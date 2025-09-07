@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YOLOv8 Video Detection</title>
+</head>
+<body>
+  <h2>Upload Video (2–3 min max)</h2>
+  <form action="/predict_video/" method="post" enctype="multipart/form-data">
+    <label for="file">Choose MP4 Video:</label>
+    <input type="file" id="file" name="file" accept="video/mp4" required>
+    <button type="submit">Upload & Process</button>
+  </form>
+</body>
+</html>
