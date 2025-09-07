@@ -3,14 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YOLOv8 Video Detection</title>
+  <title>Honey Bee Detection</title>
 </head>
 <body>
-  <h2>Upload Video (2–3 min max)</h2>
-  <form action="/predict_video/" method="post" enctype="multipart/form-data">
-    <label for="file">Choose MP4 Video:</label>
-    <input type="file" id="file" name="file" accept="video/mp4" required>
-    <button type="submit">Upload & Process</button>
+  <h1>Upload Video for Detection</h1>
+  <form id="uploadForm">
+    <label for="fileInput">Choose a video:</label>
+    <input type="file" id="fileInput" name="file" accept="video/mp4" title="Upload video file" placeholder="Select a video" />
+    <button type="submit">Upload</button>
   </form>
+
+  <h2>Processed Video:</h2>
+  <video id="outputVideo" width="640" height="480" controls></video>
+
+  <script>
+    const form = document.getElementById("uploadForm");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fileInput = document.getElementById("fileInput");
+      const formData = new FormData();
+      formData.append("file", fileInput.files[0]);
+
+      const response = await fetch("/predict_video/", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      document.getElementById("outputVideo").src = data.video_url;
+    });
+  </script>
 </body>
 </html>

@@ -1,29 +1,36 @@
 from fastapi import FastAPI, UploadFile, File
-from fastapi.responses import FileResponse
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from ultralytics import YOLO
 import cv2
 import tempfile
 import os
+import uuid
 
-# Load YOLOv8 model once
+# Load YOLO model
 model = YOLO("best.pt")
 
 app = FastAPI()
 
-# Serve static files (frontend)
+# Serve static files (videos, frontend assets)
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+@app.get("/")
+def root():
+    return {"message": "Honey Bee Detection API is running!"}
 
 @app.post("/predict_video/")
 async def predict_video(file: UploadFile = File(...)):
-    # Save uploaded video
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp:
-        temp.write(await file.read())
-        input_path = temp.name
+    # Generate unique file names
+    video_id = str(uuid.uuid4())
+    input_path = f"static/{video_id}_input.mp4"
+    output_path = f"static/{video_id}_output.mp4"
 
-    output_path = input_path.replace(".mp4", "_output.mp4")
+    # Save uploaded file
+    with open(input_path, "wb") as f:
+        f.write(await file.read())
 
-    # Read video
+    # Process video
     cap = cv2.VideoCapture(input_path)
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     out = cv2.VideoWriter(output_path, fourcc, 20.0,
@@ -53,4 +60,6 @@ async def predict_video(file: UploadFile = File(...)):
     cap.release()
     out.release()
 
-    return FileResponse(output_path, media_type="video/mp4", filename="output.mp4")
+    # Return video URL (frontend can play it)
+    video_url = f"/static/{video_id}_output.mp4"
+    return JSONResponse({"video_url": video_url})
