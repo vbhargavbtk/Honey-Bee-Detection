@@ -3,7 +3,6 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from ultralytics import YOLO
 import cv2
-import tempfile
 import os
 import uuid
 
@@ -12,7 +11,10 @@ model = YOLO("best.pt")
 
 app = FastAPI()
 
-# Serve static files (videos, frontend assets)
+# Ensure static folder exists
+os.makedirs("static", exist_ok=True)
+
+# Serve static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
@@ -21,7 +23,7 @@ def root():
 
 @app.post("/predict_video/")
 async def predict_video(file: UploadFile = File(...)):
-    # Generate unique file names
+    # Unique filenames
     video_id = str(uuid.uuid4())
     input_path = f"static/{video_id}_input.mp4"
     output_path = f"static/{video_id}_output.mp4"
@@ -60,6 +62,5 @@ async def predict_video(file: UploadFile = File(...)):
     cap.release()
     out.release()
 
-    # Return video URL (frontend can play it)
-    video_url = f"/static/{video_id}_output.mp4"
-    return JSONResponse({"video_url": video_url})
+    # Return video URL
+    return JSONResponse({"video_url": f"/static/{video_id}_output.mp4"})
