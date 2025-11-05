@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐝 Bee Detection</title>
+<link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🐝</text></svg>' />
+
+<style>
+  :root {
+    --accent-1: #ffb703;
+    --accent-2: #fb8500;
+    --bg-1: linear-gradient(135deg, #fceabb, #f8b500);
+    --card-bg: #ffffff;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+    background: var(--bg-1);
+    margin: 0;
+    padding: 0 12px 40px;
+    min-height: 100vh;
+    color: #222;
+  }
+
+  h1 { margin: 30px 0 10px; font-size: 2.2rem; }
+  .upload-box { margin: 18px auto; padding: 26px; border: 2px dashed var(--accent-1); width: min(780px, 95%); background: var(--card-bg); border-radius: 14px; box-shadow: 0 6px 22px rgba(0,0,0,0.12); display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; transition: transform 0.28s ease, border-color 0.2s ease; }
+  .upload-box:hover { transform: translateY(-4px); border-color: var(--accent-2); }
+
+  .file-label { display: block; text-align: left; font-size: 0.95rem; color: #333; margin-bottom: 6px; }
+  .file-row { display:flex; gap:12px; align-items:center; width:100%; }
+  input[type="file"] { padding: 8px; border-radius: 8px; border: 1px solid #ddd; background: #fff; cursor: pointer; flex: 1 1 auto; }
+
+  button#uploadBtn { padding: 12px 22px; font-size: 1rem; border: none; background: var(--accent-1); color: white; border-radius: 10px; cursor: pointer; transition: transform 0.18s ease, box-shadow 0.18s, background 0.2s; box-shadow: 0 6px 18px rgba(0,0,0,0.12); font-weight: 700; }
+  button#uploadBtn:hover:not(:disabled) { transform: translateY(-3px); background: var(--accent-2); }
+  button#uploadBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .progress-container { width: 100%; max-width: 780px; margin: 12px auto; background: #eee; border-radius: 8px; overflow: hidden; display: none; }
+  .progress-bar { width: 0%; height: 16px; background: var(--accent-1); transition: width 0.2s; margin-bottom: 6px; }
+
+  .result { margin-top: 26px; }
+  .media { max-width: 820px; width: 100%; margin: 14px auto; border: 3px solid var(--accent-1); border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); display: block; }
+  .hidden { display: none !important; }
+
+  #beeCount { font-size: 1.05rem; font-weight: 700; margin-top: 10px; color: #222; background: #fff3cd; display: inline-block; padding: 10px 18px; border-radius: 999px; box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
+  #alertNotice { margin-top: 8px; font-size: 0.95rem; font-weight: 600; color: #155724; background: #d4edda; padding: 6px 12px; border-radius: 12px; display: none; }
+
+  @media (max-width:600px) {
+    .upload-box { grid-template-columns: 1fr; }
+    h1 { font-size: 1.6rem; }
+    #beeCount { font-size: 0.98rem; }
+  }
+</style>
+</head>
+<body>
+<h1>🐝 Bee Detection</h1>
+
+<div class="upload-box">
+  <div>
+    <label class="file-label" for="fileInput">Choose an image or video to detect bees</label>
+    <div class="file-row">
+      <input type="file" id="fileInput" accept="image/*,video/*"/>
+    </div>
+  </div>
+  <div>
+    <button id="uploadBtn">Upload & Detect</button>
+  </div>
+</div>
+
+<div class="progress-container" id="uploadProgressContainer">
+  <div class="progress-bar" id="uploadProgressBar"></div>
+</div>
+<div class="progress-container" id="processingProgressContainer">
+  <div class="progress-bar" id="processingProgressBar"></div>
+</div>
+
+<main class="result">
+  <img id="resultImage" class="media hidden" alt="Processed image with detected bees">
+  <video id="resultVideo" class="media hidden" controls playsinline muted autoplay>
+    <source id="resultVideoSource" src="" type="video/mp4">
+  </video>
+  <div id="beeCount" class="hidden"></div>
+  <div id="alertNotice"></div>
+</main>
+
+<script>
+const uploadBtn = document.getElementById('uploadBtn');
+const fileInput = document.getElementById('fileInput');
+const uploadProgressContainer = document.getElementById('uploadProgressContainer');
+const uploadProgressBar = document.getElementById('uploadProgressBar');
+const processingProgressContainer = document.getElementById('processingProgressContainer');
+const processingProgressBar = document.getElementById('processingProgressBar');
+const resultImage = document.getElementById('resultImage');
+const resultVideo = document.getElementById('resultVideo');
+const beeCountDiv = document.getElementById('beeCount');
+const alertNotice = document.getElementById('alertNotice');
+
+const BASE_URL = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file'))
+  ? window.location.origin
+  : 'http://127.0.0.1:8000';
+
+uploadBtn.addEventListener('click', () => {
+  if (!fileInput.files.length) {
+    alert("Please select a file first");
+    return;
+  }
+  uploadFile(fileInput.files[0]);
+});
+
+function uploadFile(file) {
+  resultImage.classList.add('hidden');
+  resultVideo.classList.add('hidden');
+  beeCountDiv.classList.add('hidden');
+  alertNotice.style.display = 'none';
+  beeCountDiv.textContent = '';
+  alertNotice.textContent = '';
+
+  uploadProgressContainer.style.display = 'block';
+  uploadProgressBar.style.width = '0%';
+  processingProgressContainer.style.display = 'block';
+  processingProgressBar.style.width = '0%';
+
+  uploadBtn.disabled = true;
+  uploadBtn.textContent = "Uploading...";
+
+  const xhr = new XMLHttpRequest();
+  const endpoint = file.type.startsWith('video') ? '/predict_video/' : '/predict/';
+  xhr.open("POST", BASE_URL + endpoint, true);
+  xhr.onerror = () => { alert("Network error while contacting server."); resetButton(); };
+
+  xhr.upload.onprogress = (e) => {
+    if (e.lengthComputable) {
+      const percent = (e.loaded / e.total) * 100;
+      uploadProgressBar.style.width = percent + '%';
+    }
+  };
+
+  xhr.onreadystatechange = () => {
+    if (xhr.readyState === 4) {
+      if (xhr.status !== 200) {
+        let msg = 'Server error (' + xhr.status + ')';
+        try { msg += ': ' + (JSON.parse(xhr.responseText).error || ''); } catch (_) {}
+        alert(msg);
+        resetButton();
+        return;
+      }
+      uploadProgressBar.style.width = '100%';
+      uploadBtn.textContent = "Processing...";
+      
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.random() * 10;
+        if (progress >= 100) progress = 100;
+        processingProgressBar.style.width = progress + '%';
+        if (progress >= 100) {
+          clearInterval(interval);
+          handleResult(JSON.parse(xhr.responseText));
+        }
+      }, 200);
+    }
+  };
+
+  const form = new FormData();
+  form.append('file', file);
+  xhr.send(form);
+}
+
+function handleResult(data) {
+  if (data.error) {
+    alert("Error: " + data.error);
+    resetButton();
+    return;
+  }
+
+  if (data.image_url) {
+    resultImage.src = data.image_url;
+    resultImage.classList.remove('hidden');
+    beeCountDiv.textContent = '🐝 Detected Bees: ' + (data.count ?? '0');
+    beeCountDiv.classList.remove('hidden');
+  }
+
+  if (data.video_url) {
+    const src = document.getElementById('resultVideoSource');
+    src.src = data.video_url;
+    resultVideo.load();
+    resultVideo.classList.remove('hidden');
+    resultVideo.oncanplay = () => { try { resultVideo.play().catch(()=>{}); } catch(_){} };
+
+    const frameCounts = data.frame_counts || {};
+    const fps = data.fps || 20;
+
+    beeCountDiv.classList.remove('hidden');
+    function updateBeeCount() {
+      const currentFrame = Math.floor(resultVideo.currentTime * fps);
+      beeCountDiv.textContent = '🐝 Bees in Frame: ' + (frameCounts[currentFrame] || 0);
+    }
+    resultVideo.removeEventListener('timeupdate', updateBeeCount);
+    resultVideo.addEventListener('timeupdate', updateBeeCount);
+  }
+
+  // Show Telegram alert notice if sent
+  if (data.sms_sent) {
+    alertNotice.textContent = '✅ Telegram alert sent!';
+    alertNotice.style.display = 'inline-block';
+  }
+
+  resetButton();
+}
+
+function resetButton() {
+  uploadBtn.disabled = false;
+  uploadBtn.textContent = 'Upload & Detect';
+  setTimeout(() => {
+    uploadProgressContainer.style.display = 'none';
+    processingProgressContainer.style.display = 'none';
+    uploadProgressBar.style.width = '0%';
+    processingProgressBar.style.width = '0%';
+  }, 500);
+}
+</script>
+</body>
+</html>
