@@ -8,7 +8,7 @@ This project is a state-of-the-art web application designed to automate the dete
 
 ## 📂 Project Structure
 
-*   **`frontend/`**: Contains the user interface code (HTML, CSS, JS) and static assets.
+*   **`frontend/`**: Contains the user interface code (HTML, CSS, JS).
 *   **`backend/`**: Contains the FastAPI application (`app.py`), the YOLO model (`best.pt`), and Python dependencies.
 
 ## 🌟 Key Features
