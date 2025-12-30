@@ -13,7 +13,13 @@ __pycache__/
 
 # Output files
 static/outputs/*
-!static/outputs/.gitkeep
+
+# Local scripts
+run_locally.bat
+
+# Media files
+*.mp4
+*.jpg
 
 # Environment Variables
 .env
