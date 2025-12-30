@@ -14,7 +14,7 @@ This is a FastAPI-based web application that uses a YOLO model (`best.pt`) to de
 2.  **Create a virtual environment** (optional but recommended):
     ```bash
     python -m venv venv
-    source venv/bin/activate  # On Windows: venv\Scripts\activate
+    venv\Scripts\activate
     ```
 3.  **Install dependencies**:
     ```bash
