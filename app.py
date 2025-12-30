@@ -58,6 +58,14 @@ async def root():
     index_path = os.path.join(os.path.dirname(__file__), "index.html")
     return FileResponse(index_path, media_type="text/html")
 
+@app.get("/style.css")
+async def style():
+    return FileResponse(os.path.join(os.path.dirname(__file__), "style.css"), media_type="text/css")
+
+@app.get("/script.js")
+async def script():
+    return FileResponse(os.path.join(os.path.dirname(__file__), "script.js"), media_type="application/javascript")
+
 # Image prediction
 @app.post("/predict/")
 async def predict(request: Request, file: UploadFile = File(...)):
