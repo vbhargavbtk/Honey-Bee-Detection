@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from ultralytics import YOLO
+from dotenv import load_dotenv
 import cv2
 import numpy as np
 import os
@@ -17,6 +18,9 @@ ALERT_THRESHOLD = 100
 # Output directory
 OUTPUT_DIR = "static/outputs"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+# Load environment variables
+load_dotenv()
 
 # Load YOLO model
 model = YOLO("best.pt")
@@ -34,8 +38,8 @@ app.mount("/static", StaticFiles(directory="static", html=True), name="static")
 
 # Telegram alert function
 def _send_telegram_alert_if_configured(body: str) -> Optional[str]:
-    token = "8460169438:AAH2VNPBqX5c0LtkaBuKk1Da4ACperd2VvQ"
-    chat_id = "1116086962"
+    token = os.getenv("TELEGRAM_TOKEN")
+    chat_id = os.getenv("TELEGRAM_CHAT_ID")
     if not (token and chat_id):
         return None
     try:

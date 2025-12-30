@@ -1,7 +1,19 @@
+# Virtual Environment
 yolovenv/
+venv/
+env/
+
+# Python cache
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
-.DS_Store
+
+# IDE settings
+.vscode/
+.idea/
+
+# Output files
+static/outputs/*
+!static/outputs/.gitkeep
+
+# Environment Variables
 .env
