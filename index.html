@@ -409,16 +409,7 @@
           uploadProgressBar.style.width = '100%';
           uploadBtn.textContent = "Processing...";
 
-          let progress = 0;
-          const interval = setInterval(() => {
-            progress += Math.random() * 10;
-            if (progress >= 100) progress = 100;
-            processingProgressBar.style.width = progress + '%';
-            if (progress >= 100) {
-              clearInterval(interval);
-              handleResult(JSON.parse(xhr.responseText));
-            }
-          }, 200);
+          handleResult(JSON.parse(xhr.responseText));
         }
       };
 

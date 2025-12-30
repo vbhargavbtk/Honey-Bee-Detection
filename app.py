@@ -112,8 +112,6 @@ async def predict_video(request: Request, file: UploadFile = File(...)):
             return JSONResponse(content={"error": "Cannot open uploaded video"}, status_code=400)
 
         fps = int(cap.get(cv2.CAP_PROP_FPS)) or 20
-        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
         output_filename = f"{uuid.uuid4().hex}.mp4"
         output_path = os.path.join(OUTPUT_DIR, output_filename)
