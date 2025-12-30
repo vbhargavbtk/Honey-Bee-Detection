@@ -16,7 +16,8 @@ from typing import Optional
 ALERT_THRESHOLD = 100
 
 # Output directory
-OUTPUT_DIR = "static/outputs"
+# Output directory
+OUTPUT_DIR = "../frontend/static/outputs"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # Load environment variables
@@ -34,7 +35,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.mount("/static", StaticFiles(directory="static", html=True), name="static")
+app.mount("/static", StaticFiles(directory="../frontend/static", html=True), name="static")
 
 # Telegram alert function
 def _send_telegram_alert_if_configured(body: str) -> Optional[str]:
@@ -55,16 +56,16 @@ def _send_telegram_alert_if_configured(body: str) -> Optional[str]:
 # Root endpoint
 @app.get("/")
 async def root():
-    index_path = os.path.join(os.path.dirname(__file__), "index.html")
+    index_path = os.path.join(os.path.dirname(__file__), "../frontend/index.html")
     return FileResponse(index_path, media_type="text/html")
 
 @app.get("/style.css")
 async def style():
-    return FileResponse(os.path.join(os.path.dirname(__file__), "style.css"), media_type="text/css")
+    return FileResponse(os.path.join(os.path.dirname(__file__), "../frontend/style.css"), media_type="text/css")
 
 @app.get("/script.js")
 async def script():
-    return FileResponse(os.path.join(os.path.dirname(__file__), "script.js"), media_type="application/javascript")
+    return FileResponse(os.path.join(os.path.dirname(__file__), "../frontend/script.js"), media_type="application/javascript")
 
 # Image prediction
 @app.post("/predict/")
