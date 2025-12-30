@@ -257,37 +257,6 @@
       margin-bottom: 20px;
       font-size: 1.05rem;
     }
-
-    /* Stats Overlay */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      margin: 30px 0;
-    }
-
-    .stat-item {
-      background: linear-gradient(135deg, #fff8e1, #fff);
-      border: 1px solid #ffeeba;
-      padding: 20px;
-      border-radius: 12px;
-      text-align: center;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
-    }
-
-    .stat-value {
-      font-size: 1.8rem;
-      font-weight: 800;
-      color: var(--accent-2);
-      display: block;
-      margin-bottom: 5px;
-    }
-
-    .stat-label {
-      font-size: 0.9rem;
-      color: #666;
-      font-weight: 600;
-    }
   </style>
 </head>
 
@@ -315,9 +284,7 @@
   <div class="progress-container" id="uploadProgressContainer">
     <div class="progress-bar" id="uploadProgressBar"></div>
   </div>
-  <div class="progress-container" id="processingProgressContainer">
-    <div class="progress-bar" id="processingProgressBar"></div>
-  </div>
+
 
   <main class="result">
     <img id="resultImage" class="media hidden" alt="Processed image with detected bees">
@@ -350,8 +317,7 @@
     const fileInput = document.getElementById('fileInput');
     const uploadProgressContainer = document.getElementById('uploadProgressContainer');
     const uploadProgressBar = document.getElementById('uploadProgressBar');
-    const processingProgressContainer = document.getElementById('processingProgressContainer');
-    const processingProgressBar = document.getElementById('processingProgressBar');
+
     const resultImage = document.getElementById('resultImage');
     const resultVideo = document.getElementById('resultVideo');
     const beeCountDiv = document.getElementById('beeCount');
@@ -379,8 +345,7 @@
 
       uploadProgressContainer.style.display = 'block';
       uploadProgressBar.style.width = '0%';
-      processingProgressContainer.style.display = 'block';
-      processingProgressBar.style.width = '0%';
+
 
       uploadBtn.disabled = true;
       uploadBtn.textContent = "Uploading...";
@@ -465,9 +430,7 @@
       uploadBtn.textContent = 'Upload & Detect';
       setTimeout(() => {
         uploadProgressContainer.style.display = 'none';
-        processingProgressContainer.style.display = 'none';
-        uploadProgressBar.style.width = '0%';
-        processingProgressBar.style.width = '0%';
+
       }, 500);
     }
   </script>
