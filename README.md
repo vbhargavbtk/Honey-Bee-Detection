@@ -26,58 +26,6 @@ This project is a state-of-the-art web application designed to automate the dete
 *   **Frontend**: HTML5, CSS3, JavaScript
 *   **Utilities**: `imageio`, `python-dotenv`
 
-## 🚀 Getting Started
-
-### Prerequisites
-*   Python 3.8+
-*   Git
-
-### Installation
-
-1.  **Clone the Repository**
-    ```bash
-    git clone https://github.com/vbhargavbtk/Honey-Bee-Detection.git
-    cd Honey-Bee-Detection
-    ```
-
-2.  **Backend Setup**
-    Navigate to the backend directory and set up the environment:
-    ```bash
-    cd backend
-    python -m venv venv
-    
-    # Windows
-    venv\Scripts\activate
-    
-    # macOS/Linux
-    source venv/bin/activate
-    ```
-
-3.  **Install Dependencies**
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-4.  **Configure Environment Variables**
-    *   Create a `.env` file in the `backend/` directory.
-    *   Add your Telegram credentials (optional):
-    ```ini
-    TELEGRAM_TOKEN=your_token_here
-    TELEGRAM_CHAT_ID=your_chat_id_here
-    ```
-
-## 🏃‍♂️ Running the App
-
-1.  Make sure you are inside the `backend` directory and your virtual environment is active.
-2.  Start the server:
-
-    ```bash
-    uvicorn app:app --reload
-    ```
-
-3.  Open your browser and navigate to:
-    👉 **http://127.0.0.1:8000**
-
 ## 📝 How to Use
 1.  **Upload**: Select an image or video file.
 2.  **Analyze**: Click "Analyze Now".
