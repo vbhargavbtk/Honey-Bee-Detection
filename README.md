@@ -14,10 +14,21 @@ This project is a state-of-the-art web application designed to automate the dete
 ## 🌟 Key Features
 
 *   **Real-Time Detection**: Instantly identifies honeybees in uploaded images and video feeds with high accuracy.
-*   **Automated Counting**: Provides precise counts of bees per frame.
-*   **Video Analysis**: Detailed frame-by-frame analysis generating processed video with bounding boxes.
-*   **Smart Alerts**: Integrated **Telegram Notification System** that sends instant alerts if bee activity exceeds thresholds.
-*   **Interactive Dashboard**: A modern, responsive web interface.
+*   **Colony Absconding Detection**: Automatically detects **low bee activity** (below configurable threshold) to alert beekeepers of potential colony abandonment.
+*   **Detailed Analytics**: Tracks **Peak Bee Count** and **Minimum Bee Count** throughout videos to identify sudden drops in population.
+*   **Smart Telegram Alerts**: Sends instant notifications for crucial events (e.g., "🐝 Alert! Low bee activity detected").
+*   **Interactive Dashboard**: A modern, responsive web interface with real-time analysis status and results.
+
+## ⚙️ Configuration
+
+To enable Telegram notifications, create a `.env` file in the `backend/` directory:
+
+```env
+TELEGRAM_TOKEN=your_bot_token
+TELEGRAM_CHAT_ID=your_chat_id
+# Optional: Set custom threshold (Default: 20)
+# MIN_BEE_THRESHOLD=20
+```
 
 ## 🛠️ Technology Stack
 

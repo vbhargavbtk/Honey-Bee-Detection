@@ -1,7 +1,6 @@
 const uploadBtn = document.getElementById('uploadBtn');
 const fileInput = document.getElementById('fileInput');
-const uploadProgressContainer = document.getElementById('uploadProgressContainer');
-const uploadProgressBar = document.getElementById('uploadProgressBar');
+
 
 const resultImage = document.getElementById('resultImage');
 const resultVideo = document.getElementById('resultVideo');
@@ -28,8 +27,7 @@ function uploadFile(file) {
   beeCountDiv.textContent = '';
   alertNotice.textContent = '';
 
-  uploadProgressContainer.style.display = 'block';
-  uploadProgressBar.style.width = '0%';
+
 
 
   uploadBtn.disabled = true;
@@ -43,7 +41,9 @@ function uploadFile(file) {
   xhr.upload.onprogress = (e) => {
     if (e.lengthComputable) {
       const percent = (e.loaded / e.total) * 100;
-      uploadProgressBar.style.width = percent + '%';
+      if (percent >= 100) {
+        uploadBtn.textContent = "Processing...";
+      }
     }
   };
 
@@ -56,8 +56,7 @@ function uploadFile(file) {
         resetButton();
         return;
       }
-      uploadProgressBar.style.width = '100%';
-      uploadBtn.textContent = "Processing...";
+
 
       handleResult(JSON.parse(xhr.responseText));
     }
@@ -92,19 +91,45 @@ function handleResult(data) {
     const frameCounts = data.frame_counts || {};
     const fps = data.fps || 20;
 
+    // Show peak count initially
+    const counts = Object.values(frameCounts);
+    const maxCount = counts.length ? Math.max(...counts) : 0;
+    beeCountDiv.textContent = '🐝 Video Analysis: Peak Bee Count = ' + maxCount;
     beeCountDiv.classList.remove('hidden');
+
     function updateBeeCount() {
       const currentFrame = Math.floor(resultVideo.currentTime * fps);
-      beeCountDiv.textContent = '🐝 Bees in Frame: ' + (frameCounts[currentFrame] || 0);
+      // Only update if we have data for this frame
+      if (frameCounts[currentFrame] !== undefined) {
+        beeCountDiv.textContent = '🐝 Bees in Frame: ' + frameCounts[currentFrame];
+      }
     }
-    resultVideo.removeEventListener('timeupdate', updateBeeCount);
+
+    // Remove old listener if exists (best practice would be to track the function reference, 
+    // but for now clearing on new upload logic handles most conflicts. 
+    // We'll attach new one.)
+    if (window.currentVideoListener) {
+      resultVideo.removeEventListener('timeupdate', window.currentVideoListener);
+    }
+    window.currentVideoListener = updateBeeCount;
     resultVideo.addEventListener('timeupdate', updateBeeCount);
   }
 
   // Show Telegram alert notice if sent
+  // Show Telegram alert notice
+  alertNotice.style.display = 'block';
+  alertNotice.style.marginTop = '10px';
+  alertNotice.style.fontWeight = 'bold';
+
   if (data.sms_sent) {
     alertNotice.textContent = '✅ Telegram alert sent!';
-    alertNotice.style.display = 'inline-block';
+    alertNotice.style.color = 'green';
+  } else if (data.sms_error) {
+    alertNotice.textContent = '❌ Telegram error: ' + data.sms_error;
+    alertNotice.style.color = 'red';
+  } else {
+    alertNotice.textContent = 'ℹ️ No alert sent (Bee count normal)';
+    alertNotice.style.color = '#0066cc';
   }
 
   resetButton();
@@ -112,9 +137,5 @@ function handleResult(data) {
 
 function resetButton() {
   uploadBtn.disabled = false;
-  uploadBtn.textContent = 'Upload & Detect';
-  setTimeout(() => {
-    uploadProgressContainer.style.display = 'none';
-
-  }, 500);
+  uploadBtn.textContent = 'Analyze Now';
 }

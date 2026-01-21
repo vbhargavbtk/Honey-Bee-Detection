@@ -12,8 +12,8 @@ import imageio
 import requests
 from typing import Optional
 
-# Configurable threshold
-ALERT_THRESHOLD = 100
+# Configurable threshold for Colony Absconding (Low Bee Count)
+MIN_BEE_THRESHOLD = 20
 
 # Output directory
 # Output directory
@@ -89,11 +89,11 @@ async def predict(request: Request, file: UploadFile = File(...)):
         output_path = os.path.join(OUTPUT_DIR, filename)
         cv2.imwrite(output_path, img)
 
-        # Telegram alert if count > threshold
+        # Telegram alert if count < minimum threshold (Absconding)
         sms_error = None
         sms_sent = False
-        if count > ALERT_THRESHOLD:
-            err = _send_telegram_alert_if_configured(f"🐝 Alert! Bee count = {count} (image)")
+        if count < MIN_BEE_THRESHOLD:
+            err = _send_telegram_alert_if_configured(f"⚠️ Alert! Low bee activity detected (Colony Absconding?). Count = {count}")
             sms_error = err
             sms_sent = err is None
 
@@ -103,7 +103,7 @@ async def predict(request: Request, file: UploadFile = File(...)):
             "count": count,
             "sms_error": sms_error,
             "sms_sent": sms_sent,
-            "threshold": ALERT_THRESHOLD
+            "threshold": MIN_BEE_THRESHOLD
         })
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
@@ -129,8 +129,10 @@ async def predict_video(request: Request, file: UploadFile = File(...)):
         frame_idx = 0
         max_count = 0
 
-        writer = imageio.get_writer(output_path, fps=fps, codec='libx264', format='ffmpeg', output_params=['-pix_fmt','yuv420p'])
+        writer = imageio.get_writer(output_path, fps=fps, codec='libx264', format='ffmpeg', pixelformat='yuv420p', macro_block_size=1)
 
+        min_count = float('inf')
+        
         try:
             while True:
                 ret, frame = cap.read()
@@ -142,6 +144,8 @@ async def predict_video(request: Request, file: UploadFile = File(...)):
                 frame_counts[frame_idx] = count
                 if count > max_count:
                     max_count = count
+                if count < min_count:
+                    min_count = count
 
                 for box in results[0].boxes:
                     x1, y1, x2, y2 = map(int, box.xyxy[0])
@@ -159,13 +163,22 @@ async def predict_video(request: Request, file: UploadFile = File(...)):
             writer.close()
             os.remove(input_path)
 
-        # Telegram alert if max_count > threshold
+        # Telegram alert if min_count < minimum threshold (Absconding drop detected)
+        # If no frames processed (video empty), triggering alert is arguably correct or incorrect depending on definition.
+        # Assuming valid video with frames. If min_count is still inf, set to 0.
+        if min_count == float('inf'):
+            min_count = 0
+
         sms_error = None
         sms_sent = False
-        if max_count > ALERT_THRESHOLD:
-            err = _send_telegram_alert_if_configured(f"🐝 Alert! Bee count peak = {max_count} (video)")
+        print(f"[DEBUG] Video Analysis: Min count = {min_count}, Max count = {max_count}, Threshold = {MIN_BEE_THRESHOLD}") 
+        if min_count < MIN_BEE_THRESHOLD:
+            print("[DEBUG] Triggering Absconding Alert (Drop detected)!")
+            err = _send_telegram_alert_if_configured(f"⚠️ Alert! Low bee activity detected in video (Colony Absconding?). Count dropped to {min_count} (Peak: {max_count})")
             sms_error = err
             sms_sent = err is None
+        else:
+             print("[DEBUG] No Alert: Count remained above threshold.")
 
         base_url = str(request.base_url).rstrip('/')
         return JSONResponse(content={
@@ -174,7 +187,7 @@ async def predict_video(request: Request, file: UploadFile = File(...)):
             "frame_counts": frame_counts,
             "sms_error": sms_error,
             "sms_sent": sms_sent,
-            "threshold": ALERT_THRESHOLD
+            "threshold": MIN_BEE_THRESHOLD
         })
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
