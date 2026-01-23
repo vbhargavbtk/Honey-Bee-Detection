@@ -7,11 +7,14 @@ const resultVideo = document.getElementById('resultVideo');
 const beeCountDiv = document.getElementById('beeCount');
 const alertNotice = document.getElementById('alertNotice');
 
-const BASE_URL = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file'))
+const BASE_URL = (window.location.origin && window.location.origin.includes(':8000'))
   ? window.location.origin
   : 'http://127.0.0.1:8000';
 
+console.log("Script loaded. BASE_URL:", BASE_URL);
+
 uploadBtn.addEventListener('click', () => {
+  console.log("Analyze button clicked");
   if (!fileInput.files.length) {
     alert("Please select a file first");
     return;

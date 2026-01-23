@@ -11,9 +11,43 @@ import uuid
 import imageio
 import requests
 from typing import Optional
+import math
 
 # Configurable threshold for Colony Absconding (Low Bee Count)
 MIN_BEE_THRESHOLD = 20
+
+def filter_detections(boxes_data, dist_thresh=50):
+    """
+    Manually filter boxes based on center distance.
+    boxes_data: List/Array of [x1, y1, x2, y2, conf, cls]
+    """
+    if len(boxes_data) == 0:
+        return []
+    
+    # Convert to list for easier manipulation
+    boxes = sorted(boxes_data, key=lambda x: x[4], reverse=True) # Sort by confidence
+    final_boxes = []
+    
+    while len(boxes) > 0:
+        current = boxes.pop(0) # Take highest confidence
+        final_boxes.append(current)
+        
+        # Calculate center of current
+        cx1 = (current[0] + current[2]) / 2
+        cy1 = (current[1] + current[3]) / 2
+        
+        # Filter out remaining boxes that are too close
+        new_boxes = []
+        for box in boxes:
+            cx2 = (box[0] + box[2]) / 2
+            cy2 = (box[1] + box[3]) / 2
+            dist = math.sqrt((cx1 - cx2)**2 + (cy1 - cy2)**2)
+            
+            if dist > dist_thresh:
+                new_boxes.append(box)
+        boxes = new_boxes
+        
+    return final_boxes
 
 # Output directory
 # Output directory
@@ -75,16 +109,21 @@ async def predict(request: Request, file: UploadFile = File(...)):
         nparr = np.frombuffer(file_bytes, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-        results = model.predict(img, imgsz=640, conf=0.25, verbose=False)
-        for box in results[0].boxes:
-            x1, y1, x2, y2 = map(int, box.xyxy[0])
-            cls = int(box.cls)
-            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 1)
+        results = model.predict(img, imgsz=640, conf=0.20, verbose=False)
+        
+        # Custom Filtering
+        raw_boxes = results[0].boxes.data.cpu().numpy() # [x1, y1, x2, y2, conf, cls]
+        filtered_boxes = filter_detections(raw_boxes, dist_thresh=40)
+
+        for box in filtered_boxes:
+            x1, y1, x2, y2 = map(int, box[:4])
+            cls = int(box[5])
             label = model.names[cls]
+            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 1)
             cv2.putText(img, label, (x1, y1 - 5),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
 
-        count = len(results[0].boxes)
+        count = len(filtered_boxes)
         filename = f"{uuid.uuid4().hex}.jpg"
         output_path = os.path.join(OUTPUT_DIR, filename)
         cv2.imwrite(output_path, img)
@@ -139,17 +178,22 @@ async def predict_video(request: Request, file: UploadFile = File(...)):
                 if not ret:
                     break
 
-                results = model.predict(frame, imgsz=640, conf=0.25, verbose=False)
-                count = len(results[0].boxes)
+                results = model.predict(frame, imgsz=640, conf=0.20, verbose=False)
+                
+                # Custom Filtering
+                raw_boxes = results[0].boxes.data.cpu().numpy()
+                filtered_boxes = filter_detections(raw_boxes, dist_thresh=40)
+                
+                count = len(filtered_boxes)
                 frame_counts[frame_idx] = count
                 if count > max_count:
                     max_count = count
                 if count < min_count:
                     min_count = count
 
-                for box in results[0].boxes:
-                    x1, y1, x2, y2 = map(int, box.xyxy[0])
-                    cls = int(box.cls)
+                for box in filtered_boxes:
+                    x1, y1, x2, y2 = map(int, box[:4])
+                    cls = int(box[5])
                     label = model.names[cls]
                     cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 1)
                     cv2.putText(frame, label, (x1, y1 - 5),
