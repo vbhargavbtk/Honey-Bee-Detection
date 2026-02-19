@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+python-multipart
+ultralytics
+python-dotenv
+opencv-python
+numpy
+imageio
+imageio-ffmpeg
+requests
+psutil

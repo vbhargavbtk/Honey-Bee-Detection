@@ -4,61 +4,573 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🐝 Bee Detection</title>
+  <title>🐝 BeeVision — Honey Bee Detection in Video Analytics</title>
+  <meta name="description"
+    content="AI-powered honey bee detection system using YOLO deep learning. Detects and counts honeybees in images and videos, with automated colony absconding alerts.">
   <link rel="icon" type="image/svg+xml"
     href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🐝</text></svg>' />
-  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=3">
 </head>
 
 <body>
-  <header class="hero-section">
-    <h1>Bee Detection Platform</h1>
-    <p class="hero-intro">
-      Precision beekeeping powered by AI. Detect and monitor honeybees in real-time using state-of-the-art YOLO models.
-      Our platform helps in ecological monitoring and securing global food production.
-    </p>
-  </header>
 
-  <div class="upload-box">
-    <div>
-      <label class="file-label" for="fileInput">Choose an image or video to start analysis</label>
-      <div class="file-row">
-        <input type="file" id="fileInput" accept="image/*,video/*" />
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a class="nav-brand" href="#" onclick="showPage('home'); return false;">
+        <span class="nav-logo">🐝</span>
+        <span class="nav-title">BeeVision</span>
+      </a>
+      <div class="nav-links">
+        <a class="nav-link active" id="nav-home" href="#" onclick="showPage('home'); return false;">Home</a>
+        <a class="nav-link" id="nav-detection" href="#" onclick="showPage('detection'); return false;">Detection</a>
       </div>
+      <button class="nav-hamburger" id="navHamburger" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
     </div>
-    <div>
-      <button id="uploadBtn">Analyze Now</button>
+    <div class="nav-mobile-menu" id="navMobileMenu">
+      <a class="nav-mobile-link" href="#" onclick="showPage('home'); toggleMobileMenu(); return false;">Home</a>
+      <a class="nav-mobile-link" href="#"
+        onclick="showPage('detection'); toggleMobileMenu(); return false;">Detection</a>
     </div>
-  </div>
+  </nav>
 
+  <!-- ===== HOME PAGE ===== -->
+  <div id="page-home" class="page active">
 
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+      </div>
+      <div class="hero-content">
 
-
-  <main class="result">
-    <img id="resultImage" class="media hidden" alt="Processed image with detected bees">
-    <div id="beeCount" class="hidden"></div>
-    <video id="resultVideo" class="media hidden" controls playsinline muted autoplay>
-      <source id="resultVideoSource" src="" type="video/mp4">
-    </video>
-    <div id="alertNotice"></div>
-  </main>
-
-  <div class="research-container">
-    <div class="section-header">
-      <h2>About The Project</h2>
-    </div>
-
-    <section class="content-card">
-      <p style="text-align: center; font-size: 1.2rem;">
-        This project leverages advanced deep learning models—including YOLOv5, YOLOv8, and YOLOv11—to automate the
-        detection of honeybees in video frames. By analyzing real-world apiary footage, we aim to provide precision
-        beekeeping tools that help monitor bee health and population trends. This technology supports ecological
-        monitoring and ensures global food security by safeguarding vital pollination systems.
-      </p>
+        <h1 class="hero-title">Honey Bee Detection<br><span class="gradient-text">in Video Analytics</span></h1>
+        <p class="hero-subtitle">
+          An AI-powered automated honeybee monitoring system that accurately detects and counts bees
+          in images and videos — and alerts beekeepers when colony absconding is detected.
+        </p>
+        <div class="hero-actions">
+          <button class="btn-primary" onclick="showPage('detection')">Try Detection →</button>
+          <a class="btn-outline" href="#about">Learn More</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <span class="stat-number">85%</span>
+            <span class="stat-label">mAP@0.5 (YOLOv8)</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-number">4 Models</span>
+            <span class="stat-label">Compared</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-number">Real-Time</span>
+            <span class="stat-label">Alerts via Telegram</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-card-float">
+          <div class="bee-visual-ring">
+            <div class="ring ring-outer"></div>
+            <div class="ring ring-mid"></div>
+            <div class="ring ring-inner"></div>
+            <div class="bee-center">🐝</div>
+          </div>
+        </div>
+      </div>
     </section>
-  </div>
 
-  <script src="script.js?v=2"></script>
+    <!-- About / Problem -->
+    <section class="section" id="about">
+      <div class="section-container">
+        <div class="section-label">Why This Project</div>
+        <h2 class="section-title">The Problem We're Solving</h2>
+        <p class="section-subtitle">
+          Honeybees pollinate approximately 75% of crops worldwide. Monitoring their activity is critical —
+          but traditional methods are manual, slow, and error-prone.
+        </p>
+        <div class="cards-grid three-col">
+          <div class="info-card">
+            <div class="info-icon">🌍</div>
+            <h3>Global Food Security</h3>
+            <p>Nearly one-third of the world's food production depends on pollination. Honeybee population decline due
+              to climate change, habitat destruction, and pesticide exposure poses serious risks to biodiversity and
+              agriculture.</p>
+          </div>
+          <div class="info-card featured">
+            <div class="info-icon">⏱️</div>
+            <h3>Manual Monitoring Fails</h3>
+            <p>Traditional hive monitoring relies on manual inspection — time-consuming, labour-intensive, and prone to
+              human error. These limitations make it nearly impossible to detect early signs of colony stress or
+              absconding reliably.</p>
+          </div>
+          <div class="info-card">
+            <div class="info-icon">🤖</div>
+            <h3>AI-Powered Solution</h3>
+            <p>This project automates honeybee monitoring using YOLO-based deep learning. It processes video frames to
+              accurately detect and count bees, then triggers real-time Telegram alerts when the count drops dangerously
+              low.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="section section-dark">
+      <div class="section-container">
+        <div class="section-label light">How It Works</div>
+        <h2 class="section-title light">From Upload to Alert<br>in Seconds</h2>
+        <div class="steps-row">
+          <div class="step-item">
+            <div class="step-num">01</div>
+            <div class="step-icon">📁</div>
+            <h3>Upload Media</h3>
+            <p>Upload an image or video of your hive. The system supports any standard image or video format.</p>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step-item">
+            <div class="step-num">02</div>
+            <div class="step-icon">🤖</div>
+            <h3>YOLO Detection</h3>
+            <p>The YOLO deep learning model processes every frame, detecting individual honeybees using bounding boxes.
+            </p>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step-item">
+            <div class="step-num">03</div>
+            <div class="step-icon">📊</div>
+            <h3>Count & Annotate</h3>
+            <p>Bees are counted per frame. A deduplication filter removes overlapping false-positives for clean counts.
+            </p>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step-item">
+            <div class="step-num">04</div>
+            <div class="step-icon">🔔</div>
+            <h3>Alert Beekeeper</h3>
+            <p>If the bee count drops below the configured threshold, an instant Telegram alert is sent to the
+              beekeeper.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dataset & Training -->
+    <section class="section" id="dataset">
+      <div class="section-container">
+        <div class="section-label">Dataset & Training</div>
+        <h2 class="section-title">How the Model Was Trained</h2>
+        <p class="section-subtitle">A custom dataset was built from real-world YouTube honeybee footage and annotated
+          using the Roboflow platform.</p>
+
+        <div class="cards-grid two-col">
+          <div class="model-card">
+            <div class="model-card-header">
+              <span class="model-tag">Data Collection</span>
+              <h3>YouTube Hive Videos</h3>
+            </div>
+            <p>High-quality honeybee videos were collected from YouTube, covering hive entrance activity, outdoor
+              pollination scenes, different lighting environments, and varying bee densities. Frames were extracted
+              using <strong>FFmpeg</strong> at regular intervals to simulate real-time monitoring conditions.</p>
+            <div class="model-tags">
+              <span class="tag">Hive Entrance Footage</span>
+              <span class="tag">FFmpeg Frame Extraction</span>
+              <span class="tag">Multiple Lighting Conditions</span>
+            </div>
+          </div>
+
+          <div class="model-card">
+            <div class="model-card-header">
+              <span class="model-tag">Annotation</span>
+              <h3>Roboflow Platform</h3>
+            </div>
+            <p>Each visible honeybee was <strong>manually annotated with bounding boxes</strong> using Roboflow's web
+              interface. Multiple bees were labelled per image. The platform also handled dataset versioning,
+              augmentation, and export in model-compatible formats for each architecture tested.</p>
+            <div class="model-tags">
+              <span class="tag">Manual Bounding Boxes</span>
+              <span class="tag">Roboflow Annotation</span>
+              <span class="tag">Single Class: Honeybee</span>
+            </div>
+          </div>
+
+          <div class="model-card">
+            <div class="model-card-header">
+              <span class="model-tag">Data Augmentation</span>
+              <h3>Improving Generalisation</h3>
+            </div>
+            <p>Augmentation techniques were applied within Roboflow before exporting datasets to increase diversity and
+              improve model generalisation. All four models were trained on the <strong>same augmented dataset</strong>
+              using identical hyperparameters to ensure a fair and consistent architectural comparison.</p>
+            <div class="model-tags">
+              <span class="tag">Rotation & Scaling</span>
+              <span class="tag">Brightness Variation</span>
+              <span class="tag">80% Train / 20% Test Split</span>
+            </div>
+          </div>
+
+          <div class="model-card">
+            <div class="model-card-header">
+              <span class="model-tag">Post-Processing</span>
+              <h3>Custom Deduplication Filter</h3>
+            </div>
+            <p>After YOLO inference, a <strong>center-distance based deduplication algorithm</strong> is applied.
+              Bounding boxes whose centers fall within 40px of a higher-confidence detection are suppressed. This
+              removes overlapping false positives and produces clean, accurate bee counts per frame.</p>
+            <div class="model-tags">
+              <span class="tag">conf = 0.20</span>
+              <span class="tag">dist_thresh = 40px</span>
+              <span class="tag">Sorted by Confidence</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Model Comparison -->
+    <section class="section section-dark" id="models">
+      <div class="section-container">
+        <div class="section-label light">Model Comparison</div>
+        <h2 class="section-title light">4 Deep Learning Models<br>Tested Head-to-Head</h2>
+        <p class="section-subtitle" style="color:rgba(255,255,255,0.5);">All models were trained on the same
+          Roboflow-annotated dataset with identical hyperparameters for a fair comparison.</p>
+
+        <div class="model-compare-grid">
+
+          <div class="compare-card">
+            <div class="compare-name">YOLOv5</div>
+            <div class="compare-metrics">
+              <div class="metric"><span class="metric-label">mAP@0.5</span><span class="metric-val">0.7324</span></div>
+              <div class="metric"><span class="metric-label">mAP@0.5:0.95</span><span class="metric-val">0.3328</span>
+              </div>
+              <div class="metric"><span class="metric-label">Precision</span><span class="metric-val">76.68%</span>
+              </div>
+              <div class="metric"><span class="metric-label">Recall</span><span class="metric-val">67.59%</span></div>
+            </div>
+            <p class="compare-note">Solid performance with anchor-based detection. Good balance of speed and accuracy,
+              though outperformed by YOLOv8 on this dataset.</p>
+          </div>
+
+          <div class="compare-card">
+            <div class="compare-rank rank-winner">🏆 Best</div>
+            <div class="compare-name">YOLOv8</div>
+            <div class="compare-metrics">
+              <div class="metric"><span class="metric-label">mAP@0.5</span><span class="metric-val winner">0.85</span>
+              </div>
+              <div class="metric"><span class="metric-label">mAP@0.5:0.95</span><span
+                  class="metric-val winner">0.42</span></div>
+              <div class="metric"><span class="metric-label">Precision</span><span class="metric-val winner">85%</span>
+              </div>
+              <div class="metric"><span class="metric-label">Recall</span><span class="metric-val winner">79.6%</span>
+              </div>
+            </div>
+            <p class="compare-note">Best overall performance. Anchor-free architecture with strong generalisation.
+              Consistently achieves the highest scores across all four evaluation metrics on this dataset.</p>
+          </div>
+
+          <div class="compare-card">
+            <div class="compare-name">YOLOv11</div>
+            <div class="compare-metrics">
+              <div class="metric"><span class="metric-label">mAP@0.5</span><span class="metric-val">0.70</span></div>
+              <div class="metric"><span class="metric-label">mAP@0.5:0.95</span><span class="metric-val">0.322</span>
+              </div>
+              <div class="metric"><span class="metric-label">Precision</span><span class="metric-val">77.6%</span></div>
+              <div class="metric"><span class="metric-label">Recall</span><span class="metric-val">64.7%</span></div>
+            </div>
+            <p class="compare-note">Newer architecture but lower recall. Optimisations for general efficiency appear to
+              compromise sensitivity for small, high-density objects like honeybees.</p>
+          </div>
+
+          <div class="compare-card">
+            <div class="compare-name">Faster R-CNN</div>
+            <div class="compare-metrics">
+              <div class="metric"><span class="metric-label">mAP@0.5</span><span class="metric-val">0.4956</span></div>
+              <div class="metric"><span class="metric-label">mAP@0.5:0.95</span><span class="metric-val">0.2145</span>
+              </div>
+              <div class="metric"><span class="metric-label">Precision</span><span class="metric-val">30.8%</span></div>
+              <div class="metric"><span class="metric-label">Recall</span><span class="metric-val">42.0%</span></div>
+            </div>
+            <p class="compare-note">Lowest performer. Two-stage architecture optimised for larger objects. High
+              computational cost and slower convergence make it unsuitable for real-time small-object detection.</p>
+          </div>
+
+        </div>
+
+        <div class="conclusion-box">
+          <span class="conclusion-icon">💡</span>
+          <div>
+            <strong>Key Finding:</strong> Single-stage YOLO detectors significantly outperform two-stage detectors like
+            Faster R-CNN for honeybee detection. <strong>YOLOv8</strong> achieved the best mAP@0.5 of
+            <strong>0.85</strong> — nearly
+            <strong>72% better</strong> than Faster R-CNN. Newer architecture does not always mean better results —
+            YOLOv11 scored lower than both YOLOv5 and YOLOv8 on this small-object dataset.
+          </div>
+        </div>
+        <!-- Performance Chart -->
+        <div class="chart-wrap">
+          <h3 class="chart-title">Model Performance Comparison</h3>
+          <canvas id="modelChart" height="120"></canvas>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Scope & Applications -->
+    <section class="section" id="scope">
+      <div class="section-container">
+        <div class="section-label">Applications</div>
+        <h2 class="section-title">Real-World Applications</h2>
+        <p class="section-subtitle">Beyond bee counting — this system supports multiple domains of beekeeping and
+          ecological research.</p>
+
+        <div class="cards-grid two-col">
+          <div class="info-card">
+            <div class="info-icon">🏥</div>
+            <h3>Colony Health Monitoring</h3>
+            <p>Monitors changes in the number of honeybees to detect possible colony decline or losses. Continuous
+              tracking enables early identification of issues before they become catastrophic.</p>
+          </div>
+          <div class="info-card">
+            <div class="info-icon">🌸</div>
+            <h3>Pollination Research</h3>
+            <p>Analyzes honeybee activity in farming areas to understand their role in pollination — providing
+              data-driven insights for agricultural planning and sustainable farming practices.</p>
+          </div>
+          <div class="info-card">
+            <div class="info-icon">🍯</div>
+            <h3>Honey Production Optimization</h3>
+            <p>Identifies the most productive hives by tracking activity levels, helping beekeepers improve honey yield
+              and allocate resources more effectively across their apiaries.</p>
+          </div>
+          <div class="info-card featured">
+            <div class="info-icon">📡</div>
+            <h3>Automated Hive Monitoring</h3>
+            <p>Uses AI technology to track bee population in real time, providing continuous hive observation without
+              the need for manual intrusion — reducing stress on the colony.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Future Work -->
+    <section class="section section-dark" id="future">
+      <div class="section-container">
+        <div class="section-label light">Future Work</div>
+        <h2 class="section-title light">What's Next</h2>
+        <p class="section-subtitle" style="color:rgba(255,255,255,0.5);">Planned enhancements to evolve BeeVision into a
+          fully autonomous smart beekeeping platform.</p>
+
+        <div class="cards-grid three-col">
+          <div class="info-card dark-card">
+            <div class="info-icon">📹</div>
+            <h3>Live Video Stream</h3>
+            <p>Integrate webcam or IP camera feeds using OpenCV to perform frame-by-frame inference in real time —
+              converting from offline analysis to continuous live hive monitoring.</p>
+          </div>
+          <div class="info-card dark-card">
+            <div class="info-icon">🖥️</div>
+            <h3>Edge Device Deployment</h3>
+            <p>Deploy the trained model on Raspberry Pi or NVIDIA Jetson devices placed directly at hive entrances.
+              Model quantization and pruning will ensure efficient performance on limited hardware.</p>
+          </div>
+          <div class="info-card dark-card">
+            <div class="info-icon">📊</div>
+            <h3>Multi-Hive Dashboard</h3>
+            <p>A centralized dashboard supporting multiple simultaneous live camera feeds — displaying hive-specific
+              statistics, activity trends, and historical data for commercial apiaries managing large numbers of hives.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Team -->
+    <section class="section" id="team">
+      <div class="section-container">
+        <div class="section-label">The Team</div>
+        <h2 class="section-title">Project By</h2>
+        <div class="guide-box" style="margin-top: 40px;">
+          <span class="guide-icon">&#127891;</span>
+          <div>
+            <div class="guide-label">Project Guide</div>
+            <div class="guide-name">Ms. Geetha K</div>
+            <div class="guide-role">Assistant Professor, Dept. of Computer Science &amp; Engineering</div>
+          </div>
+        </div>
+        <div class="team-grid">
+          <div class="team-card"><span class="team-icon">👨‍💻</span>
+            <div class="team-name">B T K Venkata Bhargav</div>
+            <div class="team-id">BU22CSEN0100253</div>
+          </div>
+          <div class="team-card"><span class="team-icon">👩‍💻</span>
+            <div class="team-name">Yelluru Kavya</div>
+            <div class="team-id">BU22CSEN0101357</div>
+          </div>
+          <div class="team-card"><span class="team-icon">👨‍💻</span>
+            <div class="team-name">Tarimala Aravind</div>
+            <div class="team-id">BU22CSEN0100962</div>
+          </div>
+          <div class="team-card"><span class="team-icon">👨‍💻</span>
+            <div class="team-name">G C Karthik Reddy</div>
+            <div class="team-id">BU22CSEN0101525</div>
+          </div>
+        </div>
+        <p class="section-subtitle" style="margin-top: 32px; margin-bottom: 0;">
+          B.Tech Computer Science &amp; Engineering &nbsp;&middot;&nbsp;
+          GITAM School of CSE, GITAM (Deemed to be University) &nbsp;&middot;&nbsp; Bengaluru &nbsp;&middot;&nbsp; 2026
+        </p>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section cta-section">
+      <div class="section-container">
+        <div class="cta-box">
+          <div class="cta-bee">🐝</div>
+          <h2>Ready to Analyze Your Hive?</h2>
+          <p>Upload an image or video and get instant AI-powered bee detection results with count and alerts.</p>
+          <button class="btn-primary large" onclick="showPage('detection')">Go to Detection →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>🐝 BeeVision &mdash; AI-Powered Honey Bee Detection &nbsp;|&nbsp; Built with FastAPI + YOLO</p>
+    </footer>
+
+  </div><!-- end #page-home -->
+
+
+  <!-- ===== DETECTION PAGE ===== -->
+  <div id="page-detection" class="page">
+
+    <section class="detection-hero">
+      <div class="detection-hero-content">
+        <div class="hero-badge">🔬 AI Detection Engine</div>
+        <h1 class="detection-title">Bee Detection &amp; Analysis</h1>
+        <p class="detection-subtitle">Upload an image or video from your hive. Our AI will detect, count, and annotate
+          every honeybee — and alert you if the colony is at risk of absconding.</p>
+        <!-- Device Status Bar -->
+        <div class="device-status-bar" id="deviceStatusBar">
+          <div class="device-status-dot" id="deviceStatusDot"></div>
+          <div class="device-status-text">
+            <span class="device-status-label" id="deviceStatusLabel">Detecting hardware...</span>
+            <span class="device-status-sub" id="deviceStatusSub"></span>
+          </div>
+          <div class="device-status-details" id="deviceStatusDetails"></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="detection-main">
+
+      <!-- Upload Card -->
+      <div class="upload-card" id="uploadCard">
+        <div class="upload-dropzone" id="dropzone">
+          <div class="dropzone-icon">📂</div>
+          <p class="dropzone-text">Drag &amp; drop your image or video here</p>
+          <p class="dropzone-sub">or click to browse &mdash; images (JPG, PNG, BMP) &amp; videos (MP4, AVI, MOV) only
+          </p>
+          <input type="file" id="fileInput" accept="image/*,video/*" />
+          <div class="file-info" id="fileInfo"></div>
+        </div>
+        <div class="threshold-row">
+          <label for="thresholdInput" class="threshold-label">
+            <span class="threshold-icon">🔔</span>
+            Alert threshold
+            <span class="threshold-hint">(send Telegram alert if bee count drops below this)</span>
+          </label>
+          <div class="threshold-control">
+            <button class="threshold-btn" onclick="adjustThreshold(-1)" type="button">−</button>
+            <input type="number" id="thresholdInput" class="threshold-input" value="20" min="1" max="999" />
+            <button class="threshold-btn" onclick="adjustThreshold(1)" type="button">+</button>
+          </div>
+        </div>
+        <button class="btn-analyze" id="uploadBtn" disabled>
+          <span id="btnText">Select a file to analyze</span>
+          <span class="btn-icon">🔍</span>
+        </button>
+        <div class="progress-wrap" id="progressWrap">
+          <div class="progress-bar-track">
+            <div class="progress-bar" id="progressBar"></div>
+          </div>
+          <span class="progress-label" id="progressLabel">Uploading...</span>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="results-area" id="resultsArea">
+        <div class="results-header">
+          <h2>Detection Results</h2>
+        </div>
+        <div class="result-media-wrap">
+          <img id="resultImage" class="result-media hidden" alt="Processed image with detected bees">
+          <video id="resultVideo" class="result-media hidden" controls playsinline muted autoplay>
+            <source id="resultVideoSource" src="" type="video/mp4">
+          </video>
+        </div>
+        <div class="result-stats" id="resultStats">
+          <div class="result-stat-card" id="beeCount"></div>
+          <div id="alertNotice" class="alert-notice"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>🐝 BeeVision &mdash; AI-Powered Honey Bee Detection &nbsp;|&nbsp; Built with FastAPI + YOLO</p>
+    </footer>
+
+  </div><!-- end #page-detection -->
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="script.js?v=6"></script>
+  <script>
+    (function () {
+      const ctx = document.getElementById('modelChart');
+      if (!ctx) return;
+      const models = ['YOLOv5', 'YOLOv8 🏆', 'YOLOv11', 'Faster R-CNN'];
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: models,
+          datasets: [
+            { label: 'mAP@0.5', data: [0.7324, 0.85, 0.70, 0.4956], backgroundColor: '#fbbf24', borderRadius: 6 },
+            { label: 'mAP@0.5:0.95', data: [0.3328, 0.42, 0.322, 0.2308], backgroundColor: '#f43f5e', borderRadius: 6 },
+            { label: 'Precision', data: [0.7668, 0.85, 0.776, 0.3081], backgroundColor: '#a78bfa', borderRadius: 6 },
+            { label: 'Recall', data: [0.6759, 0.796, 0.647, 0.4201], backgroundColor: '#22d3ee', borderRadius: 6 }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'top', labels: { color: 'rgba(255,255,255,0.7)', font: { size: 12, family: 'Inter' }, padding: 18 } },
+            tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${(c.parsed.y * 100).toFixed(1)}%` } }
+          },
+          scales: {
+            x: { ticks: { color: 'rgba(255,255,255,0.7)', font: { size: 13, weight: '700', family: 'Inter' } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: {
+              min: 0, max: 1,
+              ticks: { color: 'rgba(255,255,255,0.5)', font: { size: 11, family: 'Inter' }, callback: v => (v * 100).toFixed(0) + '%' },
+              grid: { color: 'rgba(255,255,255,0.07)' }
+            }
+          }
+        }
+      });
+    })();
+  </script>
 </body>
 
 </html>
